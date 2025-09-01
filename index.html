@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Checker</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .password-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .strength-meter {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            overflow: hidden;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .strength-weak { background-color: #dc3545; }
+        .strength-fair { background-color: #fd7e14; }
+        .strength-good { background-color: #ffc107; }
+        .strength-strong { background-color: #28a745; }
+        
+        .requirements {
+            margin-top: 1rem;
+        }
+        
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .requirement i {
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+        
+        .requirement.met {
+            color: #28a745;
+        }
+        
+        .requirement.unmet {
+            color: #6c757d;
+        }
+        
+        .password-input-group {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        
+        .password-toggle:hover {
+            color: #495057;
+        }
+        
+        .header-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="password-card fade-in">
+            <div class="text-center">
+                <i class="fas fa-shield-alt header-icon"></i>
+                <h2 class="mb-4">Password Strength Checker</h2>
+                <p class="text-muted mb-4">Enter a password to check its strength and security level</p>
+            </div>
+            
+            <div class="password-input-group mb-3">
+                <input type="password" class="form-control form-control-lg" id="passwordInput" 
+                       placeholder="Enter your password..." autocomplete="new-password">
+                <button type="button" class="password-toggle" id="togglePassword">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+            
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-semibold">Strength:</span>
+                    <span id="strengthText" class="badge bg-secondary">Enter a password</span>
+                </div>
+                <div class="strength-meter">
+                    <div class="strength-fill" id="strengthFill" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div class="requirements">
+                <h6 class="fw-semibold mb-3">Password Requirements:</h6>
+                
+                <div class="requirement unmet" id="lengthReq">
+                    <i class="fas fa-times"></i>
+                    <span>At least 8 characters long</span>
+                </div>
+                
+                <div class="requirement unmet" id="uppercaseReq">
+                    <i class="fas fa-times"></i>
+                    <span>Contains uppercase letter (A-Z)</span>
+                </div>
+                
+                <div class="requirement unmet" id="lowercaseReq">
+                    <i class="fas fa-times"></i>
+                    <span>Contains lowercase letter (a-z)</span>
+                </div>
+                
+                <div class="requirement unmet" id="numberReq">
+                    <i class="fas fa-times"></i>
+                    <span>Contains number (0-9)</span>
+                </div>
+                
+                <div class="requirement unmet" id="specialReq">
+                    <i class="fas fa-times"></i>
+                    <span>Contains special character (!@#$%^&*)</span>
+                </div>
+                
+                <div class="requirement unmet" id="lengthStrongReq">
+                    <i class="fas fa-times"></i>
+                    <span>At least 12 characters for strong security</span>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h6 class="fw-semibold mb-2">Security Tips:</h6>
+                <ul class="small text-muted mb-0">
+                    <li>Use a unique password for each account</li>
+                    <li>Consider using a password manager</li>
+                    <li>Avoid personal information in passwords</li>
+                    <li>Update passwords regularly</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const passwordInput = document.getElementById('passwordInput');
+        const togglePassword = document.getElementById('togglePassword');
+        const strengthText = document.getElementById('strengthText');
+        const strengthFill = document.getElementById('strengthFill');
+        
+        // Requirement elements
+        const lengthReq = document.getElementById('lengthReq');
+        const uppercaseReq = document.getElementById('uppercaseReq');
+        const lowercaseReq = document.getElementById('lowercaseReq');
+        const numberReq = document.getElementById('numberReq');
+        const specialReq = document.getElementById('specialReq');
+        const lengthStrongReq = document.getElementById('lengthStrongReq');
+        
+        // Password visibility toggle
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+        });
+        
+        // Password strength checking
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            checkPasswordStrength(password);
+        });
+        
+        function checkPasswordStrength(password) {
+            let score = 0;
+            let metRequirements = 0;
+            
+            // Check requirements
+            const hasLength = password.length >= 8;
+            const hasUppercase = /[A-Z]/.test(password);
+            const hasLowercase = /[a-z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            const hasStrongLength = password.length >= 12;
+            
+            // Update requirement indicators
+            updateRequirement(lengthReq, hasLength);
+            updateRequirement(uppercaseReq, hasUppercase);
+            updateRequirement(lowercaseReq, hasLowercase);
+            updateRequirement(numberReq, hasNumber);
+            updateRequirement(specialReq, hasSpecial);
+            updateRequirement(lengthStrongReq, hasStrongLength);
+            
+            // Calculate score
+            if (hasLength) { score += 1; metRequirements++; }
+            if (hasUppercase) { score += 1; metRequirements++; }
+            if (hasLowercase) { score += 1; metRequirements++; }
+            if (hasNumber) { score += 1; metRequirements++; }
+            if (hasSpecial) { score += 1; metRequirements++; }
+            if (hasStrongLength) { score += 1; }
+            
+            // Additional scoring for complexity
+            if (password.length >= 16) score += 1;
+            if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{2,}/.test(password)) score += 1;
+            
+            // Determine strength level
+            let strength, strengthClass, width;
+            
+            if (password.length === 0) {
+                strength = 'Enter a password';
+                strengthClass = 'bg-secondary';
+                width = 0;
+            } else if (score < 3) {
+                strength = 'Weak';
+                strengthClass = 'bg-danger';
+                width = 25;
+            } else if (score < 5) {
+                strength = 'Fair';
+                strengthClass = 'bg-warning';
+                width = 50;
+            } else if (score < 7) {
+                strength = 'Good';
+                strengthClass = 'bg-info';
+                width = 75;
+            } else {
+                strength = 'Strong';
+                strengthClass = 'bg-success';
+                width = 100;
+            }
+            
+            // Update UI
+            strengthText.textContent = strength;
+            strengthText.className = `badge ${strengthClass}`;
+            strengthFill.style.width = width + '%';
+            strengthFill.className = `strength-fill ${getStrengthClass(strength)}`;
+        }
+        
+        function updateRequirement(element, isMet) {
+            const icon = element.querySelector('i');
+            
+            if (isMet) {
+                element.className = 'requirement met';
+                icon.className = 'fas fa-check';
+            } else {
+                element.className = 'requirement unmet';
+                icon.className = 'fas fa-times';
+            }
+        }
+        
+        function getStrengthClass(strength) {
+            switch(strength) {
+                case 'Weak': return 'strength-weak';
+                case 'Fair': return 'strength-fair';
+                case 'Good': return 'strength-good';
+                case 'Strong': return 'strength-strong';
+                default: return '';
+            }
+        }
+        
+        // Initialize
+        checkPasswordStrength('');
+    </script>
+</body>
+</html>
